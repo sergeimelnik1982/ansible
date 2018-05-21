@@ -6,5 +6,6 @@ vpn_users:
     password: 12345
 
 ipsec_psk: "12345"
+dns_server_ip: "8.8.8.8"
 
 ip_range: "172.25.1.2-172.25.1.254"
