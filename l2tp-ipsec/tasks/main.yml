@@ -1,0 +1,75 @@
+---
+- name: Perform upgrade
+  apt: upgrade=safe update_cache=yes
+
+- name: Install packages
+  apt: name={{item}} state=present
+  with_items:
+    - strongswan
+    - xl2tpd
+    - strongswan-plugin-eap-mschapv2
+    - moreutils
+    - iptables-persistent
+
+- name: copy templates
+  template:
+    src="templates/ipsec.conf.j2"
+    dest="/etc/ipsec.conf"
+    mode=0600
+
+- name: copy templates
+  template:
+    src="templates/ipsec.secrets.j2"
+    dest="/etc/ipsec.secrets"
+    mode=0600
+
+- name: copy templates
+  template:
+    src="templates/xl2tpd.conf.j2"
+    dest="/etc/xl2tpd/xl2tpd.conf"
+    mode=0600
+
+- name: copy iptables templates
+  template:
+    src="templates/iptables.j2"
+    dest="/etc/iptables/rules.v4"
+    mode=0600
+
+- name: copy options templates
+  template:
+    src="templates/options.xl2tpd.j2"
+    dest="/etc/ppp/options.xl2tpd"
+    mode=0600
+
+- name: delete chap-secrets
+  file:
+    path="/etc/ppp/chap-secrets"
+    state="absent"
+
+- name: create chap-secrets
+  file:
+    mode="0600"
+    path="/etc/ppp/chap-secrets"
+    state="touch"
+
+- name: add ppp users
+  lineinfile:
+    path="/etc/ppp/chap-secrets"
+    line="{{ item.key }} * {{ item.value.password }} *"
+  loop: "{{ lookup('dict',vpn_users) }}"
+
+- name: run sysctl
+  sysctl:
+    value="1"
+    name="net.ipv4.ip_forward"
+    reload="yes"
+
+- name: restart ipsec
+  systemd:
+    enabled="yes"
+    name="{{ item }}"
+    state="restarted"
+  with_items:
+    - strongswan
+    - xl2tpd
+    - netfilter-persistent

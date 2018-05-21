@@ -1,0 +1,18 @@
+[global]
+ipsec saref = no
+debug tunnel = no
+debug avp = no
+debug network = no
+debug state = no
+
+
+[lns default]
+ip range = {{ ip_range }}
+local ip = {{ ansible_default_ipv4.address }}
+require authentication = yes
+name = l2tp
+pass peer = yes
+ppp debug = no
+pppoptfile = /etc/ppp/options.xl2tpd
+length bit = yes
+unix authentication = no

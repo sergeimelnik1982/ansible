@@ -1,0 +1,10 @@
+---
+vpn_users:
+  user1:
+    password: 12345
+  user2:
+    password: 12345
+
+ipsec_psk: "12345"
+
+ip_range: "172.25.1.2-172.25.1.254"
